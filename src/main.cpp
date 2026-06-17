@@ -277,6 +277,28 @@ void setupWebServer()
   Serial.println("Web server started.");
 }
 
+void handleSerialInput()
+{
+  if (Serial.available() > 0) {
+    String inputString = Serial.readStringUntil('\n');
+    inputString.trim();
+
+    if (inputString.length() == 0) {
+      return;
+    }
+
+    float input = inputString.toFloat();
+
+    bool success = setOutputFromInput(input);
+
+    if (success) {
+      Serial.println("Serial command accepted.");
+    } else {
+      Serial.println("Serial command rejected.");
+    }
+  }
+}
+
 void setup()
 {
   Serial.begin(921600);
@@ -292,5 +314,6 @@ void setup()
 
 void loop()
 {
+  handleSerialInput();
   server.handleClient();
 }
