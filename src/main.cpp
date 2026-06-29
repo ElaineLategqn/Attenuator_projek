@@ -24,6 +24,16 @@ const char* wifiPassword = "12345678";
 
 WebServer server(80);
 
+// Pulses latch enable so the attenuator accepts the new pin values
+void latchOutput()
+{
+  delayMicroseconds(1);              // allow data pins to settle
+  digitalWrite(LatchEnable, HIGH);   // latch new value
+  delayMicroseconds(1);              // keep LE high briefly
+  digitalWrite(LatchEnable, LOW);    // return to latched mode
+  delayMicroseconds(1);              // hold data after latch
+}
+
 // Sets all ESP32 pins to output mode and starts them LOW
 void setupPins()
 {
@@ -35,6 +45,8 @@ void setupPins()
     digitalWrite(pins[i], LOW);
     pinValues[i] = 0;
   }
+
+  latchOutput();  // Ensure the output is latched to LOW at startup
 }
 
 // Checks whether the user value is allowed
@@ -88,6 +100,7 @@ bool setOutputFromInput(float input)
 
   calculatePinValues(input);
   writePins();
+  latchOutput();
 
   Serial.print("Output set to: ");
   Serial.println(input, 2);
